@@ -26,6 +26,7 @@
 #pragma once
 
 #include "axmol.h"
+#include <memory>
 
 class Square;
 
@@ -76,8 +77,8 @@ private:
     int _sceneID                                    = 0;
 
 
-    Square* _redSquare = nullptr;
-    ax::DrawNode* _greenSquare = nullptr;
+    std::unique_ptr<Square> _redSquare = nullptr;
+    std::unique_ptr<Square> _greenSquare = nullptr;
 
     bool _isDragging = false;
     ax::Vec2 _dragOffset;

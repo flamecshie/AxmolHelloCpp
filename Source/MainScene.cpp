@@ -143,8 +143,13 @@ bool MainScene::init()
     Vec2 center = Vec2(origin.x + visibleSize.width / 2,
                     origin.y + visibleSize.height / 2);
 
-    _redSquare = new Square(center, BOX_SIZE, Color4F::RED);
+    _greenSquare = std::make_unique<Square>(center + Vec2(BOX_SIZE * 3, 0), BOX_SIZE, Color4F::GREEN);
+    _greenSquare->draw(this);
+
+    _redSquare = std::make_unique<Square>(center, BOX_SIZE, Color4F::RED);
     _redSquare->draw(this);
+
+
 
     // scheduleUpdate() is required to ensure update(float) is called on every loop
     scheduleUpdate();
@@ -330,8 +335,6 @@ MainScene::~MainScene()
     if (_mouseListener)
         _eventDispatcher->removeEventListener(_mouseListener);
 
-    delete _redSquare;
-    _redSquare = nullptr;
     _sceneID = -1;
 }
 
