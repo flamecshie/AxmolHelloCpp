@@ -25,6 +25,7 @@
 
 #include "MainScene.h"
 #include "Core/Square.h"
+#include "Scene/EndScene.h"
 
 using namespace ax;
 
@@ -165,6 +166,15 @@ bool MainScene::isRedOverGreen() const
     return _redSquare->intersects(*_greenSquare);
 }
 
+void MainScene::goToEndScene()
+{
+    auto scene = utils::createInstance<EndScene>();
+    if (scene)
+    {
+        Director::getInstance()->replaceScene(scene);
+    }
+}
+
 void MainScene::onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
     for (auto&& t : touches)
@@ -194,6 +204,7 @@ void MainScene::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event
             _redSquare.reset();
             _isDragging = false;
             AXLOGD("Red square removed after overlapping green square.");
+            goToEndScene();
             break;
         }
     }
@@ -250,6 +261,7 @@ bool MainScene::onMouseMove(Event* event)
             _redSquare.reset();
             _isDragging = false;
             AXLOGD("Red square removed after overlapping green square.");
+            goToEndScene();
         }
     }
 
