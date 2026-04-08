@@ -27,6 +27,8 @@
 
 #include "axmol.h"
 
+class Square;
+
 class MainScene : public ax::Scene
 {
     enum class GameState
@@ -66,8 +68,6 @@ public:
     MainScene();
     ~MainScene() override;
 
-    ax::DrawNode* createSquare(const ax::Vec2& center, float size, const ax::Color4F& color);
-
 private:
     GameState _gameState                            = GameState::init;
     ax::EventListenerTouchAllAtOnce* _touchListener = nullptr;
@@ -76,7 +76,7 @@ private:
     int _sceneID                                    = 0;
 
 
-    ax::DrawNode* _redSquare = nullptr;
+    Square* _redSquare = nullptr;
     ax::DrawNode* _greenSquare = nullptr;
 
     bool _isDragging = false;

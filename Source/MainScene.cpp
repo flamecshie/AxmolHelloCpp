@@ -24,6 +24,7 @@
  ****************************************************************************/
 
 #include "MainScene.h"
+#include "Core/Square.h"
 
 using namespace ax;
 
@@ -142,7 +143,8 @@ bool MainScene::init()
     Vec2 center = Vec2(origin.x + visibleSize.width / 2,
                     origin.y + visibleSize.height / 2);
 
-    _redSquare = createSquare(center, BOX_SIZE, Color4F::RED);
+    _redSquare = new Square(center, BOX_SIZE, Color4F::RED);
+    _redSquare->draw(this);
 
     // scheduleUpdate() is required to ensure update(float) is called on every loop
     scheduleUpdate();
@@ -183,19 +185,10 @@ bool MainScene::onMouseDown(Event* event)
 
     AXLOGD("onMouseDown detected, button: {}", static_cast<int>(e->getMouseButton()));
 
-    auto center = _redSquare->getPosition();
-
-    Vec2 bottomLeft = center - Vec2(BOX_SIZE / 2, BOX_SIZE / 2);
-    Vec2 topRight   = center + Vec2(BOX_SIZE / 2, BOX_SIZE / 2);
-
-    // Hit Test
-    if (mousePos.x >= bottomLeft.x && mousePos.x <= topRight.x &&
-        mousePos.y >= bottomLeft.y && mousePos.y <= topRight.y)
+    if (_redSquare && _redSquare->hitTest(mousePos))
     {
         _isDragging = true;
-
-        // 記錄滑鼠與中心的距離（避免跳動）
-        _dragOffset = center - mousePos;
+        _dragOffset = _redSquare->getPosition() - mousePos;
     }
 
     return true;
@@ -222,9 +215,10 @@ bool MainScene::onMouseMove(Event* event)
     Vec2 mousePos = e->getLocation();
 
     Vec2 newCenter = mousePos + _dragOffset;
-
-
-    _redSquare->setPosition(newCenter);
+    if (_redSquare)
+    {
+        _redSquare->setPosition(newCenter);
+    }
 
     return true;
 }
@@ -335,15 +329,10 @@ MainScene::~MainScene()
         _eventDispatcher->removeEventListener(_keyboardListener);
     if (_mouseListener)
         _eventDispatcher->removeEventListener(_mouseListener);
+
+    delete _redSquare;
+    _redSquare = nullptr;
     _sceneID = -1;
 }
 
 
-ax::DrawNode* MainScene::createSquare(const ax::Vec2& center, float size, const ax::Color4F& color)
-{
-    ax::DrawNode* square = ax::DrawNode::create();
-    square->setPosition(center);
-    square->drawSolidRect(ax::Vec2(-size/2, -size/2), ax::Vec2(size/2, size/2), color);
-    this->addChild(square);
-    return square;
-}
