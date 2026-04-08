@@ -14,6 +14,7 @@ static ax::Vec2 rotateVector(const ax::Vec2& v, float sinA, float cosA)
     return ax::Vec2(v.x * cosA - v.y * sinA, v.x * sinA + v.y * cosA);
 }
 
+//算出兩物體在軸上的影長
 static bool projectPolygon(const ax::Vec2 axis, const ax::Vec2 points[4], float& min, float& max)
 {
     min = max = dot(axis, points[0]);
@@ -26,6 +27,7 @@ static bool projectPolygon(const ax::Vec2 axis, const ax::Vec2 points[4], float&
     return true;
 }
 
+//檢查影子有沒有疊在一起
 static bool overlapOnAxis(const ax::Vec2 axis, const ax::Vec2 a[4], const ax::Vec2 b[4])
 {
     float aMin, aMax;

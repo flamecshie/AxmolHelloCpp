@@ -188,7 +188,8 @@ bool MainScene::isRedOverGreen() const
     if (!_redSquare || !_greenSquare)
         return false;
     
-    return _redSquare->intersects(*_greenSquare);
+    return _redSquare->containsPoint(_greenSquare->getPosition());
+    //return _redSquare->intersects(*_greenSquare);
 }
 
 void MainScene::goToEndScene()
@@ -250,11 +251,6 @@ void MainScene::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event
     {
         Vec2 newCenter = t->getLocation() + _dragOffset;
         _redSquare->setPosition(newCenter);
-
-        if (checkTurn())
-        {
-            break;
-        }
     }
 }
 
@@ -303,8 +299,6 @@ bool MainScene::onMouseMove(Event* event)
     if (_redSquare)
     {
         _redSquare->setPosition(newCenter);
-
-        checkTurn();
     }
 
     return true;
@@ -316,7 +310,7 @@ bool MainScene::checkTurn()
     {
         _successCount++;
         _countLabel->setString("Count:" + std::to_string(_successCount));
-        
+
         _isDragging = false;
 
         if(SUCCESS_THRESHOLD == 0 || _successCount >= SUCCESS_THRESHOLD)
@@ -365,13 +359,10 @@ void MainScene::update(float delta)
 
     case GameState::update:
     {
-        /////////////////////////////
-        // Add your codes below...like....
-        //
-        // UpdateJoyStick();
-        // UpdatePlayer();
-        // UpdatePhysics();
-        // ...
+        if(_isDragging)
+        {
+            checkTurn();
+        }
         break;
     }
 
