@@ -83,6 +83,6 @@ private:
     bool _isDragging = false;
     ax::Vec2 _dragOffset;
 
-    
+    bool isRedOverGreen() const;
 };
 

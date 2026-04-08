@@ -157,28 +157,50 @@ bool MainScene::init()
     return true;
 }
 
+bool MainScene::isRedOverGreen() const
+{
+    if (!_redSquare || !_greenSquare)
+        return false;
+    return _redSquare->getBounds().intersectsRect(_greenSquare->getBounds());
+}
+
 void MainScene::onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
     for (auto&& t : touches)
     {
-        // AXLOGD("onTouchesBegan detected, X:{}  Y:{}", t->getLocation().x, t->getLocation().y);
+        auto touchPos = t->getLocation();
+        if (_redSquare && _redSquare->hitTest(touchPos))
+        {
+            _isDragging = true;
+            _dragOffset = _redSquare->getPosition() - touchPos;
+            break;
+        }
     }
 }
 
 void MainScene::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
+    if (!_isDragging || !_redSquare)
+        return;
+
     for (auto&& t : touches)
     {
-        // AXLOGD("onTouchesMoved detected, X:{}  Y:{}", t->getLocation().x, t->getLocation().y);
+        Vec2 newCenter = t->getLocation() + _dragOffset;
+        _redSquare->setPosition(newCenter);
+
+        if (isRedOverGreen())
+        {
+            _redSquare.reset();
+            _isDragging = false;
+            AXLOGD("Red square removed after overlapping green square.");
+            break;
+        }
     }
 }
 
 void MainScene::onTouchesEnded(const std::vector<ax::Touch*>& touches, ax::Event* event)
 {
-    for (auto&& t : touches)
-    {
-        // AXLOGD("onTouchesEnded detected, X:{}  Y:{}", t->getLocation().x, t->getLocation().y);
-    }
+    _isDragging = false;
 }
 
 bool MainScene::onMouseDown(Event* event)
@@ -215,14 +237,19 @@ bool MainScene::onMouseMove(Event* event)
         return false;
 
     EventMouse* e = static_cast<EventMouse*>(event);
-    // AXLOGD("onMouseMove detected, X:{}  Y:{}", e->getLocation().x, e->getLocation().y);
-
     Vec2 mousePos = e->getLocation();
 
     Vec2 newCenter = mousePos + _dragOffset;
     if (_redSquare)
     {
         _redSquare->setPosition(newCenter);
+
+        if (isRedOverGreen())
+        {
+            _redSquare.reset();
+            _isDragging = false;
+            AXLOGD("Red square removed after overlapping green square.");
+        }
     }
 
     return true;
