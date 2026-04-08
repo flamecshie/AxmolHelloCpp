@@ -161,7 +161,8 @@ bool MainScene::isRedOverGreen() const
 {
     if (!_redSquare || !_greenSquare)
         return false;
-    return _redSquare->getBounds().intersectsRect(_greenSquare->getBounds());
+    
+    return _redSquare->intersects(*_greenSquare);
 }
 
 void MainScene::onTouchesBegan(const std::vector<ax::Touch*>& touches, ax::Event* event)
