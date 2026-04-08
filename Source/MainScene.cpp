@@ -55,6 +55,9 @@ bool MainScene::init()
     auto safeArea    = _director->getSafeAreaRect();
     auto safeOrigin  = safeArea.origin;
 
+    std::random_device rd;
+    _rng = std::mt19937(rd());
+
     /////////////////////////////
     // 2. add a menu item with "X" image, which is clicked to quit the program
     //    you may modify it.
@@ -144,13 +147,35 @@ bool MainScene::init()
     Vec2 center = Vec2(origin.x + visibleSize.width / 2,
                     origin.y + visibleSize.height / 2);
 
-    _greenSquare = std::make_unique<Square>(center + Vec2(BOX_SIZE * 3, 0), BOX_SIZE, Color4F::GREEN);
+    float halfW = BOX_SIZE * 0.5f;
+    float halfH = BOX_SIZE * 0.5f;
+
+    std::uniform_real_distribution<float> disX(origin.x + halfW, origin.x + visibleSize.width - halfW);
+    std::uniform_real_distribution<float> disY(origin.y + halfH, origin.y + visibleSize.height - halfH);
+
+    Vec2 randomPos = Vec2(disX(_rng), disY(_rng));
+
+    _greenSquare = std::make_unique<Square>(randomPos, BOX_SIZE, Color4F::GREEN);
     _greenSquare->draw(this);
 
     _redSquare = std::make_unique<Square>(center, BOX_SIZE, Color4F::RED);
     _redSquare->draw(this);
 
 
+    _countLabel = Label::createWithTTF("Count:0", "fonts/Marker Felt.ttf", 24);
+    if (_countLabel == nullptr)
+    {
+        problemLoading("'fonts/Marker Felt.ttf'");
+    }
+    else
+    {
+        // position the label on the center of the screen
+        _countLabel->setPosition(
+            Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height - _countLabel->getContentSize().height * 2));
+
+        // add the label as a child to this layer
+        this->addChild(_countLabel, 1);
+    }
 
     // scheduleUpdate() is required to ensure update(float) is called on every loop
     scheduleUpdate();
@@ -172,6 +197,33 @@ void MainScene::goToEndScene()
     if (scene)
     {
         Director::getInstance()->replaceScene(scene);
+    }
+}
+
+void MainScene::resetTurn()
+{
+    auto visibleSize = _director->getVisibleSize();
+    auto origin      = _director->getVisibleOrigin();
+
+    Vec2 center = Vec2(origin.x + visibleSize.width / 2,
+                    origin.y + visibleSize.height / 2);
+
+    float halfW = BOX_SIZE * 0.5f;
+    float halfH = BOX_SIZE * 0.5f;
+
+    std::uniform_real_distribution<float> disX(origin.x + halfW, origin.x + visibleSize.width - halfW);
+    std::uniform_real_distribution<float> disY(origin.y + halfH, origin.y + visibleSize.height - halfH);
+
+    Vec2 randomPos = Vec2(disX(_rng), disY(_rng));
+
+    if (_redSquare)
+    {
+        _redSquare->setPosition(center);
+    }
+
+    if (_greenSquare)
+    {
+        _greenSquare->setPosition(randomPos);
     }
 }
 
@@ -199,12 +251,8 @@ void MainScene::onTouchesMoved(const std::vector<ax::Touch*>& touches, ax::Event
         Vec2 newCenter = t->getLocation() + _dragOffset;
         _redSquare->setPosition(newCenter);
 
-        if (isRedOverGreen())
+        if (checkTurn())
         {
-            _redSquare.reset();
-            _isDragging = false;
-            AXLOGD("Red square removed after overlapping green square.");
-            goToEndScene();
             break;
         }
     }
@@ -256,16 +304,36 @@ bool MainScene::onMouseMove(Event* event)
     {
         _redSquare->setPosition(newCenter);
 
-        if (isRedOverGreen())
-        {
-            _redSquare.reset();
-            _isDragging = false;
-            AXLOGD("Red square removed after overlapping green square.");
-            goToEndScene();
-        }
+        checkTurn();
     }
 
     return true;
+}
+
+bool MainScene::checkTurn()
+{
+    if (isRedOverGreen())
+    {
+        _successCount++;
+        _countLabel->setString("Count:" + std::to_string(_successCount));
+        
+        _isDragging = false;
+
+        if(SUCCESS_THRESHOLD == 0 || _successCount >= SUCCESS_THRESHOLD)
+        {
+            _redSquare.reset();
+            AXLOGD("Red square removed after overlapping green square.");
+            goToEndScene();
+        }
+        else
+        {
+            resetTurn();
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 bool MainScene::onMouseScroll(Event* event)
@@ -377,5 +445,3 @@ MainScene::~MainScene()
 
     _sceneID = -1;
 }
-
-

@@ -43,6 +43,7 @@ class MainScene : public ax::Scene
     };
 
     const float BOX_SIZE = 100.0f;
+    const int SUCCESS_THRESHOLD = 5;
 
 public:
     bool init() override;
@@ -68,6 +69,9 @@ public:
 
     void goToEndScene();
 
+    bool checkTurn();
+    void resetTurn();
+
     MainScene();
     ~MainScene() override;
 
@@ -76,6 +80,7 @@ private:
     ax::EventListenerTouchAllAtOnce* _touchListener = nullptr;
     ax::EventListenerKeyboard* _keyboardListener    = nullptr;
     ax::EventListenerMouse* _mouseListener          = nullptr;
+    ax::Label* _countLabel                          = nullptr;
     int _sceneID                                    = 0;
 
 
@@ -86,5 +91,9 @@ private:
     ax::Vec2 _dragOffset;
 
     bool isRedOverGreen() const;
+
+    std::mt19937 _rng;
+
+    int _successCount = 0;
 };
 
