@@ -44,15 +44,7 @@ void Square::draw(ax::Node* parent)
     }
     refresh();
     _node->setPosition(_position);
-}
-
-void Square::update(float /*delta*/)
-{
-}
-
-ax::DrawNode* Square::getDrawNode() const
-{
-    return _node;
+    _node->setRotation(getRotation());
 }
 
 void Square::refresh()
@@ -64,4 +56,14 @@ void Square::refresh()
     float halfSize = _width * 0.5f;
     _node->drawSolidRect(ax::Vec2(-halfSize, -halfSize), ax::Vec2(halfSize, halfSize), _color);
     _node->setPosition(_position);
+    _node->setRotation(getRotation());
+}
+
+void Square::update(float /*delta*/)
+{
+}
+
+ax::DrawNode* Square::getDrawNode() const
+{
+    return _node;
 }

@@ -15,9 +15,14 @@ public:
     void setSize(float size);
     ax::Size getSize() const;
 
+    void setRotation(float rotation);
+    float getRotation() const;
+
     ax::Rect getBounds() const;
     virtual bool containsPoint(const ax::Vec2& point) const;
     virtual bool hitTest(const ax::Vec2& point) const;
+    void getRotatedCorners(ax::Vec2 corners[4]) const;
+    bool intersects(const BaseObject& other) const;
 
     virtual void draw(ax::Node* parent) = 0;
     virtual void update(float delta);
@@ -29,5 +34,6 @@ protected:
     ax::Vec2 _position;
     float _width;
     float _height;
+    float _rotation;
     bool _visible;
 };
